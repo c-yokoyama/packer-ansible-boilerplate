@@ -1,0 +1,8 @@
+- hosts: all
+  connection: ssh
+  gather_facts: no
+  become: true
+  vars_files: "{{ lookup('env', 'ENV') }}.yml"
+
+  roles:
+    - { role: nginx }

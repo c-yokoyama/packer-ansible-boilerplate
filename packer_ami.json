@@ -1,0 +1,47 @@
+{
+  "builders": [{
+    "type": "amazon-ebs",
+    "profile": "{{ user `env`}}",
+    "region": "{{ user `region`}}",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "name": "amzn-ami-hvm-2018*",
+        "root-device-type": "ebs"
+      },
+      "owners": "amazon",
+      "most_recent": true
+    },
+    "instance_type": "t3.micro",
+    "ssh_username": "ec2-user",
+    "ami_name": "{{ user `env`}}-packer-ami",
+    "ami_description": "{{ user `env`}}-packer-ami",
+    "run_tags": {
+      "key": "value"
+    },
+    "tags": {
+      "key": "value"
+    }
+  }],
+  "provisioners": [{
+      "type": "ansible",
+      "playbook_file": "./playbook.yml",
+      "ansible_env_vars": ["ENV={{user `env`}}"]
+    },
+    {
+      "type": "file",
+      "source": "tests",
+      "destination": "/tmp"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo yum install -y ruby rubygems ruby-devel",
+        "sudo gem install bundler --no-ri --no-rdoc",
+        "cd /tmp/tests",
+        "bundle install --path=vendor",
+        "bundle exec rake spec:nginx"
+      ]
+    }
+
+  ]
